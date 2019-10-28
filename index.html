@@ -10,7 +10,7 @@
         margin: 0;
       }
       #content {
-        max-width: 400px;
+        max-width: 1400px;
         margin: 0px auto;
       }
     </style>
@@ -19,7 +19,58 @@
 <body>
   <div id="content">
   <script>
-    async function run() {}
+    function square(x, y, w, h, c) {
+      var div = document.createElement('div')
+      div.style.left = x + "px"
+      div.style.top = y + "px"
+      div.style.width = w + "px"
+      div.style.height = h + "px"
+      div.style.backgroundColor = c
+      div.style.display = "inline-block"
+      return div;
+    }
+    async function run() {
+      const url = 'https://api.tinybird.co/v0/pipes/madrid_no2.json?token=p.eyJ1IjogIjI0OTA1NjBmLWJkYTEtNDE0OC1iZmViLTNmYWEzODMzZGEzMyIsICJpZCI6ICJkOTYxMjk2YS1mZTllLTQ2MzEtYTJiMy02OTA1N2Y5M2RmODcifQ.NZqRDFnFQWu4ylTCVyLfQ8LGt0KN2JR6ILSANmSObBM'
+      const response = await fetch(url)
+      const data = await response.json();
+      console.log(data)
+
+      var columnHeight = 30
+      var content = document.getElementById('content')
+      for (var station of data.data) {
+        var div_station = document.createElement('div')
+        var dates = {}
+        for (var [i, day] of Object.entries(station.days)) { 
+          dates[day] = station.values[i]
+        }
+
+        for (var day = 0; day < 365; day++) {
+          var value = dates[day]
+          var color
+          if (value <= 20) {
+            color = `rgba(63, 191, 63, 1.0)`
+          } else {
+            if (value > 180) {
+              color = `rgba(242, 63, 63, 1.0)`
+            } else {
+              var trueValue = (1-(value/180)) * 255
+              color = `rgba(${trueValue}, ${trueValue}, ${trueValue}, 1.0)`
+            }
+          }
+          var s = square(0, 0, 3, columnHeight, color)
+          div_station.appendChild(s)
+        }
+
+        var text = document.createElement('div')
+        text.style.display = 'inline-block';
+        text.style.width= '200px';
+        text.style.textAlign = 'right'
+        text.style.font = '11px sans-serif'
+        text.innerHTML = station.direccion;
+        div_station.appendChild(text)
+        content.appendChild(div_station)
+      }
+    }
     run()
   </script>
 </html>
